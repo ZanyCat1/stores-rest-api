@@ -1,8 +1,10 @@
 from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
 from models.item import ItemModel
+from resources.store import StoreList
 
 class Item(Resource):
+	#condense these two parsers down a bit, so they at least pull from the same base or however that works
 	parser = reqparse.RequestParser()
 	parser.add_argument('price',
 											type=float,
@@ -15,6 +17,14 @@ class Item(Resource):
 											help="Every item needs a store id."
 											)
 
+	delete_parser = reqparse.RequestParser()
+	delete_parser.add_argument('store_id',
+														type=int,
+														required=True,
+														help="Every item needs a store id."
+														)
+
+
 	@jwt_required()
 	def get(self, name):
 		item = ItemModel.find_by_name(name)
@@ -25,15 +35,14 @@ class Item(Resource):
 	@jwt_required()
 	def post(self, name):
 		data = Item.parser.parse_args()
-
+		rval = []
 		if ItemModel.find_by_name(name):
-			if ItemModel.find_by_store_id(data['store_id']):
-				return {'message': "An item with name '{}' already exists in store '{}'.".format(name, data['store_id'])}, 400
-		  # You cannot put the same item in two different stores with this implementation. Needs to check
-			# if this item exists in the given store_id
-
-
-		#item = ItemModel(name, data['price'], data['store_id'])
+			for store in StoreList.get(self)['stores']:
+				if store['store_id'] == data['store_id']:
+					for item in store['items']:
+						if item['name'] == name:
+							return {'message': "An item with name '{}' already exists in store '{}'.".format(name, data['store_id'])}, 400
+#	
 		item = ItemModel(name, **data)
 		
 		try:
@@ -45,11 +54,18 @@ class Item(Resource):
 
 	@jwt_required()
 	def delete(self, name):
-		item = ItemModel.find_by_name(name)
-		if item:
-			item.delete_from_db()
-		
-		return {"message": "Item '{}' deleted.".format(name)}
+		item_to_delete = ""
+		data = Item.delete_parser.parse_args()
+		if ItemModel.find_by_name(name):
+			for store in StoreList.get(self)['stores']:
+				if store['store_id'] == data['store_id']:
+					for item in store['items']:
+						if item['name'] == name:
+							item_to_delete = ItemModel.find_by_name(name)
+		if item_to_delete:
+			item_to_delete.delete_from_db()
+			return {"message": "Item '{}' deleted.".format(name)}
+		return {"message": "Item '{}' not found".format(name)}
 	
 	@jwt_required()
 	def put(self, name):
