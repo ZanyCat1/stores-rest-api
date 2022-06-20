@@ -10,10 +10,13 @@ from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 
 app = Flask(__name__)
-if os.environ.get('DATABASE_URL').startswith("postgres://"):
-	app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("://", "ql://", 1)
-else:
-	app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('sqlite:///data.db')
+try:
+	if os.environ.get('DATABASE_URL').startswith("postgres://"):
+		app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("://", "ql://", 1)
+	else:
+		app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('sqlite:///data.db')
+except:
+	print("Did something break? not connected to any databases")
 	
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'jose'
@@ -33,6 +36,7 @@ def hello():
 	return {"Hello": "This is a store!"}
 
 if __name__ == '__main__':
+	from run import *
 	db.init_app(app)
 	app.run(port=5001, debug=True)
 

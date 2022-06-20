@@ -24,12 +24,14 @@ class Item(Resource):
 
 	@jwt_required()
 	def post(self, name):
+		data = Item.parser.parse_args()
+
 		if ItemModel.find_by_name(name):
-			return {'message': "An item with name '{}' already exists.".format(name)}, 400
+			if ItemModel.find_by_store_id(data['store_id']):
+				return {'message': "An item with name '{}' already exists in store '{}'.".format(name, data['store_id'])}, 400
 		  # You cannot put the same item in two different stores with this implementation. Needs to check
 			# if this item exists in the given store_id
 
-		data = Item.parser.parse_args()
 
 		#item = ItemModel(name, data['price'], data['store_id'])
 		item = ItemModel(name, **data)
