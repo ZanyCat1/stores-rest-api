@@ -10,11 +10,14 @@ from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 
 app = Flask(__name__)
+
+#Is this one for the local testing?
 #try:
 #	app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("://", "ql://", 1)
 #except:
 #	app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
 
+#If so, is this one for hosting? *currently heroku
 try:
 	if os.environ.get('DATABASE_URL').startswith("postgres://"):
 		app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("://", "ql://", 1)
@@ -40,12 +43,12 @@ api.add_resource(UserRegister, '/register')
 
 @app.route('/')
 def hello():
-	return {"Hello": "Did this update?"}
-
+	return {"Hello": "Maybe this did it??"}
 if __name__ == '__main__':
 	from run import *
 	db.init_app(app)
 	app.run(port=5001, debug=True)
 
 
+#This time I deleted the data.db file, as well as switched the try:catch at the top of this place to the longer one
 																								  
