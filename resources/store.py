@@ -20,7 +20,7 @@ class Store(Resource):
 			validated_store.save_to_db()
 			return validated_store.json(), 201
 		except:
-			return validated_store, 500 
+			return validated_store 
 	
 	def get(self, store):
 		store = store.strip()
@@ -28,7 +28,7 @@ class Store(Resource):
 		try:
 			return validated_store.json()
 		except:
-			return {'message': validated_store}, 404
+			return validated_store
 
 	@jwt_required()
 	def put(self, store):
@@ -38,7 +38,7 @@ class Store(Resource):
 		try:
 			validated_store.name = data['new_name']
 			validated_store.save_to_db()
-			return "Changed store '{}' to '{}'".format(store, data['new_name']), 
+			return "Changed store '{}' to '{}'".format(store, data['new_name']), 201
 		except:
 			return validated_store
 
@@ -46,10 +46,11 @@ class Store(Resource):
 	def delete(self, store):
 		store = store.strip()
 		validated_store = StoreValidations.validate_store_delete(store)
-		if validated_store:
+		try:
 			StoreValidations.delete_validated_store(validated_store)
 			return {'message': "Store '{}', id '{}' deleted".format(validated_store.name, validated_store.id)}
-		return {'message': "Store '{}' not found".format(store)}
+		except:
+			return validated_store
 
 
 class StoreList(Resource):

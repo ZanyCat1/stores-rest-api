@@ -35,7 +35,7 @@ class Item(Resource):
 			validated_item.save_to_db()
 			return validated_item.json(), 201
 		except:
-			return validated_item, 500 #Internal Server 
+			return validated_item
 
 	#@jwt_required()
 	def get(self, item):
@@ -43,27 +43,29 @@ class Item(Resource):
 		results = ItemValidations.validate_item_get(item)
 		if results:
 			 return results
-		return {"message": "Item '{}' not found".format(item)}, 404
+		return results
 
 	@jwt_required()
 	def put(self, item):
 		data = MoreValidations.strip_from_parser(Item.parser.parse_args())
 		item = item.strip()
-		validated_item = ItemValidations.validate_item_put(item, data['store'], data['price'])
-		if validated_item:	
+		validated_item = ItemValidations.validate_item_put(item, **data)
+		try:	
 			validated_item.save_to_db()
 			return validated_item.json(), 201
-		return {"message": "No such store '{}' found".format(data['store'])}
+		except:
+			return validated_item
 
 	@jwt_required()
 	def delete(self, item):
 		data = MoreValidations.strip_from_parser(Item.delete_parser.parse_args())
 		item = item.strip()
 		item_to_delete = ItemValidations.validate_item_delete(data['store'], item)
-		if item_to_delete:
+		try:
 			item_to_delete.delete_from_db()
 			return {"message": "Item '{}' costing {}, deleted from store {}".format(item, item_to_delete.price, data['store'])}
-		return {"message": "Item '{}' not found in store '{}'".format(item, data['store'])}
+		except:
+			return item_to_delete
 	
 
 class ItemList(Resource):
