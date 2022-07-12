@@ -36,8 +36,7 @@ class Store(Resource):
 		store = store.strip()
 		validated_store = StoreValidations.validate_store_put(data['new_name'], store)
 		try:
-			validated_store.name = data['new_name']
-			validated_store.save_to_db()
+			StoreValidations.put_validated_store(validated_store, data['new_name'])
 			return "Changed store '{}' to '{}'".format(store, data['new_name']), 201
 		except:
 			return validated_store

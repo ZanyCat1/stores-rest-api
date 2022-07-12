@@ -47,6 +47,15 @@ class StoreValidations():
 		return {"message": "Could not find store '{}'.".format(store)}, 404
 		#return {"message": "An error occurred finding the store."}, 500 
 
+	def put_validated_store(store, new_name):
+		if store:
+			for item in store.items:
+				item.store_name = new_name
+				item.save_to_db()
+			store.name = new_name
+			store.save_to_db()
+		return "store was null"
+
 	def validate_store_delete(store):							 
 		if store:
 			if StoreModel.find_by_id(store):
@@ -63,10 +72,9 @@ class StoreValidations():
 				item.store_id = None
 				item.save_to_db()
 			store.delete_from_db()
-		return "store was null"
+		return {"message": "Store was null"}, 404
 
 
-												#Added error codes below
 class ItemValidations():
 	def validate_item_post(item, **data): 
 		if item:
@@ -94,10 +102,9 @@ class ItemValidations():
 				if ItemModel.item_exists_in_store(item, check_store):
 					item_to_add = ItemModel.find_by_store_id(store, item) or ItemModel.find_by_store_name(store, item)
 					item_to_add.price = price
-					return item_to_add
 				else:
 					item_to_add = ItemModel(item, price, store)
-					return item_to_add
+				return item_to_add
 			return {"message": "No such store '{}' found.".format(store)}, 404
 		return {"message": "An error occurred inserting the item."}, 500 
 
