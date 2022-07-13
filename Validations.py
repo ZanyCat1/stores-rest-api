@@ -45,10 +45,11 @@ class StoreValidations():
 			error_message = "Cannot change store to existing name '{}'.".format(data)
 		if error_message:
 			return {"message": error_message}, 400
-		if StoreModel.find_by_name(store):
+		if StoreModel.is_number(store):
+			if StoreModel.find_by_id(store):
+				return StoreModel.find_by_id(store)
+		elif StoreModel.find_by_name(store):
 			return StoreModel.find_by_name(store)
-		if StoreModel.find_by_id(store):
-			return StoreModel.find_by_id(store)
 		return {"message": "Could not find store '{}'.".format(store)}, 404
 		#return {"message": "An error occurred finding the store."}, 500 
 
@@ -63,10 +64,11 @@ class StoreValidations():
 
 	def validate_store_delete(store):							 
 		if store:
-			if StoreModel.find_by_name(store):
+			if StoreModel.is_number(store):
+				if StoreModel.find_by_id(store):
+					return StoreModel.find_by_id(store)
+			elif StoreModel.find_by_name(store):
 				return StoreModel.find_by_name(store)
-			if StoreModel.find_by_id(store):
-				return StoreModel.find_by_id(store)
 			return {'message': "Store '{}' not found".format(store)}, 404
 		return {'message': "There was an error deleting store '{}'.".format(store)}, 500
 
@@ -83,11 +85,12 @@ class StoreValidations():
 class ItemValidations():
 	def validate_item_post(item, **data): 
 		if item:
-			check_store = ""
-			if StoreModel.find_by_name(data['store']):
+			check_store = None
+			if StoreModel.is_number(data['store']):
+				if StoreModel.find_by_id(data['store']):
+					check_store = StoreModel.find_by_id(data['store'])
+			elif StoreModel.find_by_name(data['store']):
 				check_store = StoreModel.find_by_name(data['store'])
-			if StoreModel.find_by_id(data['store']):
-				check_store = StoreModel.find_by_id(data['store'])
 			if check_store:
 				if ItemModel.item_exists_in_store(item, check_store):
 					return {"message": "'{}' already exists in store '{}'.".format(item, data['store'])}, 400
@@ -106,10 +109,13 @@ class ItemValidations():
 	
 	def validate_item_put(item, store, price):
 		if item:
-			if StoreModel.find_by_name(store):
+			check_store = None
+			item_to_add = None
+			if StoreModel.is_number(store):
+				if StoreModel.find_by_id(store):
+					check_store = StoreModel.find_by_id(store)
+			elif StoreModel.find_by_name(store):
 				check_store = StoreModel.find_by_name(store)
-			elif StoreModel.find_by_id(store):
-				check_store = StoreModel.find_by_id(store)
 			if check_store:
 				if ItemModel.item_exists_in_store(item, check_store):
 					item_to_add = ItemModel.find_by_store_name(check_store.name, item)
@@ -121,11 +127,12 @@ class ItemValidations():
 		return {"message": "An error occurred inserting the item."}, 500 
 
 	def validate_item_delete(store, item):
-		if ItemModel.find_by_store_name(store, item):
+		item_to_delete = None
+		if StoreModel.is_number(store):
+			if ItemModel.find_by_store_id(store, item):
+				item_to_delete = ItemModel.find_by_store_id(store, item)
+		elif ItemModel.find_by_store_name(store, item):
 			item_to_delete = ItemModel.find_by_store_name(store, item)
-		#I think making next item elif will keep code from trying to evaluate it with a name when it wants a number
-		elif ItemModel.find_by_store_id(store, item):
-			item_to_delete = ItemModel.find_by_store_id(store, item)
 		try:
 			return item_to_delete
 		except:

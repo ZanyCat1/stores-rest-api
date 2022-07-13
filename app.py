@@ -43,7 +43,7 @@ api.add_resource(UserRegister, '/register')
 
 @app.route('/')
 def hello():
-	return {"Hello": "1:09p worked on validate_store_get"}
+	return {"Hello": "2:31p worked on several validations"}
 if __name__ == '__main__':
 	from run import *
 	db.init_app(app)
