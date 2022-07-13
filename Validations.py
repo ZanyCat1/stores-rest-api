@@ -130,10 +130,10 @@ class ItemValidations():
 		item_to_delete = None
 		if StoreModel.is_number(store):
 			if ItemModel.find_by_store_id(store, item):
-				item_to_delete = ItemModel.find_by_store_id(store, item)
+				item_to_delete = ItemModel.find_by_store_id(store, item)	
 		elif ItemModel.find_by_store_name(store, item):
 			item_to_delete = ItemModel.find_by_store_name(store, item)
-		else:
+		if not item_to_delete:
 			item_to_delete = {"message": "Item '{}' not found in store '{}'.".format(item, store)}, 404
 		return item_to_delete				 
 	
