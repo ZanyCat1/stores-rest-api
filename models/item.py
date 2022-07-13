@@ -17,13 +17,13 @@ class ItemModel(db.Model):
 		self.name = name
 		self.price = price
 		try:
-			self.store_id = store
-			self.store_name = StoreModel.find_by_id(store).name
-		except:
-			try:
+			if StoreModel.is_number(store):
+				self.store_id = store
+				self.store_name = StoreModel.find_by_id(store).name
+			else:
 				self.store_id = StoreModel.find_by_name(store).id
 				self.store_name = store
-			except:
+		except:
 				self.store_id = None
 				self.store_name = None
 		#self.store_id = store_id
