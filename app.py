@@ -43,7 +43,7 @@ api.add_resource(UserRegister, '/register')
 
 @app.route('/')
 def hello():
-	return {"Hello": "Maybe this did it??"}
+	return {"Hello": "12:47pm packaged up"}
 if __name__ == '__main__':
 	from run import *
 	db.init_app(app)
