@@ -37,16 +37,16 @@ class ItemModel(db.Model):
 		return cls.query.filter_by(name=name).first()
 
 	@classmethod
-	def find_by_store_id(cls, this_id, name = ""):
-		if name:
-			return cls.query.filter_by(store_id=this_id).filter_by(name=name).first()
-		return cls.query.filter_by(store_id=this_id).first()
+	def find_by_store_id(cls, this_store_id, this_item_name = ""):
+		if this_item_name:
+			return cls.query.filter_by(store_id=this_store_id).filter_by(name=this_item_name).first()
+		return cls.query.filter_by(store_id=this_store_id).first()
 
 	@classmethod
-	def find_by_store_name(cls, this_name, name = ""):
-		if name:
-			return cls.query.filter_by(store_name=this_name).filter_by(name=name).first()
-		return cls.query.filter_by(store_name=this_name).first()
+	def find_by_store_name(cls, this_store_name, this_item_name = ""):
+		if this_item_name:
+			return cls.query.filter_by(store_name=this_store_name).filter_by(name=this_item_name).first()
+		return cls.query.filter_by(store_name=this_store_name).first()
 
 	@classmethod
 	def item_exists_in_store(cls, item_to_check, store_to_check):

@@ -41,9 +41,10 @@ class StoreValidations():
 			error_message = "Cannot change store to existing name '{}'.".format(data)
 		if error_message:
 			return {"message": error_message}, 400
-		store_to_return = StoreModel.find_by_id(store) or StoreModel.find_by_name(store)
-		if store_to_return:
-			return store_to_return
+		if StoreModel.find_by_name(store):
+			return StoreModel.find_by_name(store)
+		if StoreModel.find_by_id(store):
+			return StoreModel.find_by_id(store)
 		return {"message": "Could not find store '{}'.".format(store)}, 404
 		#return {"message": "An error occurred finding the store."}, 500 
 
@@ -58,10 +59,10 @@ class StoreValidations():
 
 	def validate_store_delete(store):							 
 		if store:
-			if StoreModel.find_by_id(store):
-				return StoreModel.find_by_id(store)
 			if StoreModel.find_by_name(store):
 				return StoreModel.find_by_name(store)
+			if StoreModel.find_by_id(store):
+				return StoreModel.find_by_id(store)
 			return {'message': "Store '{}' not found".format(store)}, 404
 		return {'message': "There was an error deleting store '{}'.".format(store)}, 500
 
@@ -78,7 +79,11 @@ class StoreValidations():
 class ItemValidations():
 	def validate_item_post(item, **data): 
 		if item:
-			check_store = StoreModel.find_by_id(data['store']) or StoreModel.find_by_name(data['store'])
+			check_store = ""
+			if StoreModel.find_by_name(data['store']):
+				check_store = StoreModel.find_by_name(data['store'])
+			if StoreModel.find_by_id(data['store']):
+				check_store = StoreModel.find_by_id(data['store'])
 			if check_store:
 				if ItemModel.item_exists_in_store(item, check_store):
 					return {"message": "'{}' already exists in store '{}'.".format(item, data['store'])}, 400
@@ -97,10 +102,13 @@ class ItemValidations():
 	
 	def validate_item_put(item, store, price):
 		if item:
-			check_store = StoreModel.find_by_id(store) or StoreModel.find_by_name(store)
+			if StoreModel.find_by_name(store):
+				check_store = StoreModel.find_by_name(store)
+			elif StoreModel.find_by_id(store):
+				check_store = StoreModel.find_by_id(store)
 			if check_store:
 				if ItemModel.item_exists_in_store(item, check_store):
-					item_to_add = ItemModel.find_by_store_id(store, item) or ItemModel.find_by_store_name(store, item)
+					item_to_add = ItemModel.find_by_store_name(check_store.name, item)
 					item_to_add.price = price
 				else:
 					item_to_add = ItemModel(item, price, store)
@@ -109,9 +117,14 @@ class ItemValidations():
 		return {"message": "An error occurred inserting the item."}, 500 
 
 	def validate_item_delete(store, item):
-		item_to_delete = ItemModel.find_by_store_id(store, item) or ItemModel.find_by_store_name(store, item)
-		if item_to_delete:
+		if ItemModel.find_by_store_name(store, item):
+			item_to_delete = ItemModel.find_by_store_name(store, item)
+		if ItemModel.find_by_store_id(store, item):
+			item_to_delete = ItemModel.find_by_store_id(store, item)
+		try:
 			return item_to_delete
+		except:
+			pass
 		return {"message": "Item '{}' not found in store '{}'.".format(item, store)}, 404
 
 	
