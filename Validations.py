@@ -28,10 +28,11 @@ class StoreValidations():
 	def validate_store_get(store):
 		if store:
 			store_to_return = None
-			if StoreModel.find_by_name(store):
+			if StoreModel.is_number(store):
+				if StoreModel.find_by_id(store):
+					store_to_return = StoreModel.find_by_id(store)
+			elif StoreModel.find_by_name(store):
 				store_to_return = StoreModel.find_by_name(store)
-			if StoreModel.find_by_id(store):
-				store_to_return = StoreModel.find_by_id(store)
 			if store_to_return:
 				return store_to_return
 		return {"message": "Could not find store '{}'.".format(store)}, 404
