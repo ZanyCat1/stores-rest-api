@@ -27,10 +27,13 @@ class StoreValidations():
 
 	def validate_store_get(store):
 		if store:
+			store_to_return = None
 			if StoreModel.find_by_name(store):
-				return StoreModel.find_by_name(store)
+				store_to_return = StoreModel.find_by_name(store)
 			if StoreModel.find_by_id(store):
-				return StoreModel.find_by_id(store)
+				store_to_return = StoreModel.find_by_id(store)
+			if store_to_return:
+				return store_to_return
 		return {"message": "Could not find store '{}'.".format(store)}, 404
 
 	def validate_store_put(data, store):
@@ -119,7 +122,8 @@ class ItemValidations():
 	def validate_item_delete(store, item):
 		if ItemModel.find_by_store_name(store, item):
 			item_to_delete = ItemModel.find_by_store_name(store, item)
-		if ItemModel.find_by_store_id(store, item):
+		#I think making next item elif will keep code from trying to evaluate it with a name when it wants a number
+		elif ItemModel.find_by_store_id(store, item):
 			item_to_delete = ItemModel.find_by_store_id(store, item)
 		try:
 			return item_to_delete
